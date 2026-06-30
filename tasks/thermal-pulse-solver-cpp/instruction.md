@@ -7,5 +7,22 @@ deterministic, and may contain time structure not visible from a few samples.
 Sample the oracle as needed and choose a stable discretization that resolves the
 relevant temporal and spatial scales.
 
-The verifier compares your output against a trusted manufactured reference at
-hidden points with tight tolerance, under a wall-clock budget.
+The verifier may evaluate multiple deterministic private cases in one run under
+one shared wall-clock budget. Efficient per-case resolution selection matters:
+blindly over-resolving every case can exceed the budget even when a stable
+implicit solve with the right time scale fits.
+
+Input:
+
+```json
+{ "points": [ {"x": 0.25, "y": 0.5, "t": 0.75} ] }
+```
+
+Output:
+
+```json
+{ "temperatures": [1.234] }
+```
+
+The output array must have the same length and order as the input points. Values
+must be finite numbers, and the output object must not contain extra keys.

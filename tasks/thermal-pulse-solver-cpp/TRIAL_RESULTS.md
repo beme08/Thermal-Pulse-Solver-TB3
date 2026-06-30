@@ -1,7 +1,8 @@
 # Trial Results
 
-No Harbor standard or cheat trials have been run yet. Do not add final task
-claims here until the gate is closed and the verifier is implemented.
+No Harbor standard or cheat trials have been run yet. The multi-instance
+verifier smoke checks have run locally/Docker, but they are not Harbor agent
+trials.
 
 Each future trial must record these fields:
 
@@ -9,6 +10,13 @@ Each future trial must record these fields:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | pending | pending | pending | pending | pending | pending | standard | pending | pending | pending | pending | pending |
 | pending | pending | pending | pending | pending | pending | cheat | pending | pending | pending | pending | pending |
+
+## Local Verifier Smoke Checks
+
+| job name | agent | model | reasoning config | task checksum | git commit | standard vs cheat | reward | exceptions | runtime | classification | trajectory notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| verifier-nop-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | smoke | 0.0 | expected verifier failure | <1s | legitimate-fail | Starter app emitted zeros; verifier failed on instance 0 with relative error 1. |
+| verifier-reference-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | smoke | 1.0 | none | 0.458s | legitimate-pass | Reference artifact produced exact manufactured temperatures for both deterministic private instances. |
 
 ## Classification Labels
 

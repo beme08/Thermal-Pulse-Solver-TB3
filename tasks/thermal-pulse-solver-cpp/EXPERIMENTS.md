@@ -3,10 +3,12 @@
 This file records gate and sweep measurements before full task implementation.
 Harbor standard/cheat runs belong in `TRIAL_RESULTS.md` and `docs/harbor-runs.md`.
 
-The repo currently has no git commit, so measured entries use:
+The earliest gate measurements were taken before the first commit. Newer
+implementation smoke checks were taken on a dirty worktree based on commit
+`b36e9fb`, so rows use `pending commit` until the current task tree is committed
+and checksummed.
 
 ```text
-git commit: none; repository has no commits yet
 task checksum: not stamped; compute from committed task tree before Harbor runs
 ```
 
@@ -29,6 +31,9 @@ find tasks/thermal-pulse-solver-cpp -type f \
 | fixed-grid-brute-nt-docker | Codex | GPT-5 Codex | default | not stamped | none | sweep | n/a | none | crossover at 180.000s | fail | At `Nx=Ny=320`, blind `Nt=65536` and `Nt=98304` both passed under 180s. Fixed-grid brute can still win. |
 | fixed-grid-f2-docker | Codex | GPT-5 Codex | default | not stamped | none | sweep | n/a | none | crossover at 180.000s | fail | Doubling frequency to `f*=192` did not close the fixed-grid leak; blind high-`Nt` still passed under budget. |
 | multi-instance-shared-budget-docker | Codex | GPT-5 Codex | default | not stamped | none | sweep | n/a | none | reference 19.378s; brute timeout 180.000s | conditional pass | Two deterministic instances close the runtime gap only under one shared 180s verifier budget. Not a gate closer for per-instance budgets. |
+| tb3-budget-pattern-inspection | Codex | GPT-5 Codex | default | not stamped | none | design check | n/a | none | n/a | pass | Local TB3-style tasks confirm one `test.sh`/verifier process can loop over multiple private cases under one verifier timeout. |
+| verifier-nop-docker | Codex | GPT-5 Codex | default | not stamped | none | verifier smoke | 0.0 | expected nonzero verifier exit | <1s | pass | Mounted starter app emits zeros; verifier reports instance 0 relative error 1 and reward 0.0. |
+| verifier-reference-docker | Codex | GPT-5 Codex | default | not stamped | none | verifier smoke | 1.0 | none | 0.458s | pass | Mounted reference artifact passes both deterministic instances in one verifier invocation. |
 
 ## Key Tables
 
@@ -88,3 +93,21 @@ Budget model: one shared 180s wall-clock across both instances.
 | brute | f*=192 | 320 | 320 | 65536 | 75.680s remaining | n/a | timeout |
 
 Classification: conditional pass. Valid only if the final verifier uses one shared budget across all private instances.
+
+### Verifier Smoke Checks
+
+The implemented verifier follows the shared-budget local task pattern:
+
+- one `tests/test.sh` invocation;
+- one Python verifier phase;
+- two deterministic private instances, `f*=96` and `f*=192`;
+- one shared 180s verifier budget passed through `THERMAL_SHARED_BUDGET_SEC`;
+- trusted oracle header restored into a private build directory before
+  compiling `/app/solution.cpp`.
+
+Docker results:
+
+```text
+starter /app solution -> reward 0.0, instance 0 relative error 1
+reference artifact -> reward 1.0, both instances pass
+```

@@ -31,11 +31,11 @@ command:
 
 | job name | agent | model | reasoning config | task checksum | git commit | standard vs cheat | reward | exceptions | runtime | classification | trajectory notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| none yet | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | Harbor runs are blocked until the over-resolve gate is genuinely closed and the verifier exists. |
+| none yet | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | Harbor runs have not been launched. Local Docker verifier smoke checks exist in `../TRIAL_RESULTS.md`. |
 
 ## Preconditions Before First Harbor Run
 
-- Gate is closed without defining brute at a larger grid than reference.
+- Gate is closed through the shared-budget multi-instance design.
 - `tests/test.sh` exists and runs in Docker.
 - Trusted oracle restore is implemented.
 - Reference/oracle path gets full reward with margin.

@@ -5,4 +5,4 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY app/ /app/
+COPY . /app

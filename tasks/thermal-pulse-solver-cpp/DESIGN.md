@@ -127,7 +127,15 @@ Blind brute multi-instance sequence at Nt=65536:
   total -> 180.000s, timeout
 ```
 
-Shared-budget multi-instance separation passes as a runtime discriminator. This
-should only be used if the TB3 verifier/rubric permits one wall-clock budget
-across all hidden instances in a single task run. If the budget is per instance,
-skip this as a gate lever and move to spatial+temporal cost coupling.
+Shared-budget multi-instance separation passes as a runtime discriminator.
+Local TB3-style task patterns confirm this is legitimate: `hidden-resonance-sysid`
+uses one `test.sh` invocation, one unittest process, and loops over three
+private instances inside that verifier process under `[verifier].timeout_sec`.
+`hybrid-retrieval-fusion` similarly evaluates generated hidden banks inside a
+single verifier invocation. The thermal verifier now follows that pattern:
+one `tests/test.sh`, one verifier phase, two deterministic private instances,
+and one shared 180s wall-clock.
+
+If a later external rubric review rejects shared-budget multi-instance
+evaluation, skip this as a gate lever and move to spatial+temporal cost
+coupling.

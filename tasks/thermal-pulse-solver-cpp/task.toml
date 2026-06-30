@@ -1,7 +1,42 @@
-id = "thermal-pulse-solver-cpp"
-name = "Thermal Pulse Solver C++"
+schema_version = "1.0"
+
+artifacts = ["/app/"]
+
+[metadata]
+author_name = "Shkumbin Sherifi"
+author_email = "beme08@users.noreply.github.com"
+category = "scientific-computing"
+tags = ["heat-equation", "adi", "finite-difference", "oracle", "pde"]
+expert_time_estimate_hours = 4
+relevant_experience = "Experience with numerical PDE solvers, finite-difference/finite-volume discretizations, verifier-owned oracle tasks, and benchmark hardening."
+difficulty_explanation = """
+The task requires solving a transient two-dimensional heat equation from a
+black-box oracle. Public examples are intentionally insufficient to determine
+the time scale. The verifier evaluates multiple deterministic private
+instances inside one verifier run, so efficient per-instance temporal
+resolution selection and a stable 2D implicit method matter under the shared
+wall-clock budget.
+"""
+verification_explanation = """
+Separate-verifier mode. The verifier compiles the submitted /app/solution.cpp
+against a trusted oracle restored in a private build directory, then evaluates
+two deterministic hidden thermal instances under one shared verifier timeout.
+Private parameters and exact truth live only in the verifier container. The
+agent-visible /app contains only the public oracle declarations and starter
+solution skeleton.
+"""
+
+[verifier]
+timeout_sec = 180.0
 environment_mode = "separate"
 
-[timeouts]
-run_seconds = 180
-compile_seconds = 60
+[agent]
+timeout_sec = 5400.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = false

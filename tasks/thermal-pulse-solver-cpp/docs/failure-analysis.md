@@ -1,7 +1,10 @@
 # Failure Analysis
 
-Current status: the task gate is not fully closed unless the final verifier uses
-one shared wall-clock across multiple private instances.
+Current status: local TB3-style task patterns support one shared verifier
+timeout across multiple private instances inside one `test.sh` invocation. Under
+that model, the multi-instance design closes the measured brute-force runtime
+gap. If an external rubric review rejects shared-budget multi-instance
+evaluation, the task should move to spatial+temporal cost coupling instead.
 
 ## What Works
 
@@ -50,16 +53,16 @@ reference total: 19.378s
 brute Nt=65536 total: timeout at 180.000s
 ```
 
-This is a valid runtime discriminator only if TB3 permits a single shared
-wall-clock for all hidden instances in one verifier run. If each instance gets
-its own budget, multi-instance does not close the gate.
+This is a valid runtime discriminator under the local TB3 pattern: one verifier
+script/process evaluates multiple cases under `[verifier].timeout_sec`.
 
 ## Next Decision
 
-If shared-budget multi-instance is accepted by the TB3 rubric, proceed with that
-design and document the budget model explicitly.
+Proceed with the shared-budget multi-instance design and document the budget
+model explicitly.
 
-If the budget is per instance, move to spatial+temporal cost coupling:
+If a later review determines the budget must be per instance, move to
+spatial+temporal cost coupling:
 
 - Re-derive `base_T` with sharper smooth spatial structure.
 - Prove coarse-`Nx` at correct `Nt` fails.

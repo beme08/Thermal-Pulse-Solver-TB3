@@ -8,5 +8,5 @@ if [[ $# -gt 0 ]]; then
 fi
 IMAGE="thermal-pulse-solver-cpp-gate"
 
-docker build -f "$ROOT/tasks/thermal-pulse-solver-cpp/environment/Dockerfile" -t "$IMAGE" "$ROOT"
+docker build -f "$ROOT/tasks/thermal-pulse-solver-cpp/tests/sweeps/Dockerfile" -t "$IMAGE" "$ROOT"
 docker run --rm "$IMAGE" python3 /app/tasks/thermal-pulse-solver-cpp/tests/sweeps/run_fixed_grid_sweeps.py --budget "$BUDGET" "$@"

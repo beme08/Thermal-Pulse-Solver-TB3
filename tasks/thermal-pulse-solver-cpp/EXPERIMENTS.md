@@ -33,7 +33,11 @@ find tasks/thermal-pulse-solver-cpp -type f \
 | multi-instance-shared-budget-docker | Codex | GPT-5 Codex | default | not stamped | none | sweep | n/a | none | reference 19.378s; brute timeout 180.000s | conditional pass | Two deterministic instances close the runtime gap only under one shared 180s verifier budget. Not a gate closer for per-instance budgets. |
 | tb3-budget-pattern-inspection | Codex | GPT-5 Codex | default | not stamped | none | design check | n/a | none | n/a | pass | Local TB3-style tasks confirm one `test.sh`/verifier process can loop over multiple private cases under one verifier timeout. |
 | verifier-nop-docker | Codex | GPT-5 Codex | default | not stamped | none | verifier smoke | 0.0 | expected nonzero verifier exit | <1s | pass | Mounted starter app emits zeros; verifier reports instance 0 relative error 1 and reward 0.0. |
-| verifier-reference-docker | Codex | GPT-5 Codex | default | not stamped | none | verifier smoke | 1.0 | none | 0.458s | pass | Mounted reference artifact passes both deterministic instances in one verifier invocation. |
+| verifier-reference-docker-invalid | Codex | GPT-5 Codex | default | not stamped | none | verifier smoke | 1.0 | none | 0.458s | invalid | Rejected: reference artifact evaluated the manufactured formula directly and matched verifier truth to machine precision. |
+| verifier-reference-docker-numerical | Codex | GPT-5 Codex | default | not stamped | pending commit | verifier smoke | 1.0 | none | 18.840s | pass | Numerical ADI/CN reference uses only public oracle calls; nonzero discretization errors `5.95e-4`, `6.22e-4`. |
+| multi-instance-real-solver-table-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; brute/coarse/explicit 0.0 | none | brute timeout 180.000s | pass | Real numerical reference fits; blind high-`Nt` brute times out under shared budget; coarse and explicit fail. |
+| single-instance-brute-margins-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | n/a | none | 99.996s-101.589s | leak-risk | Each private instance passes individually with blind `Nt=65536`, so the design relies on one shared verifier budget rather than per-instance timeouts. |
+| three-instance-real-solver-table-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; brute/coarse/explicit 0.0 | none | reference 25.039s; brute timeout 180.000s | pass | Three deterministic private instances preserve reference margin and make the shared-budget brute timeout robust enough for the final candidate. |
 
 ## Key Tables
 
@@ -94,13 +98,20 @@ Budget model: one shared 180s wall-clock across both instances.
 
 Classification: conditional pass. Valid only if the final verifier uses one shared budget across all private instances.
 
+### Invalid Exact Reference Check
+
+An earlier reference smoke returned machine-precision error and was rejected.
+The artifact contained the manufactured spatial/temporal formula directly and
+selected the hidden instance frequency through `THERMAL_INSTANCE`. That path was
+not a numerical solver and is no longer treated as evidence.
+
 ### Verifier Smoke Checks
 
 The implemented verifier follows the shared-budget local task pattern:
 
 - one `tests/test.sh` invocation;
 - one Python verifier phase;
-- two deterministic private instances, `f*=96` and `f*=192`;
+- three deterministic private instances;
 - one shared 180s verifier budget passed through `THERMAL_SHARED_BUDGET_SEC`;
 - trusted oracle header restored into a private build directory before
   compiling `/app/solution.cpp`.
@@ -109,5 +120,34 @@ Docker results:
 
 ```text
 starter /app solution -> reward 0.0, instance 0 relative error 1
-reference artifact -> reward 1.0, both instances pass
+numerical reference artifact -> reward 1.0
+  instance 0 rel-error 0.000594920
+  instance 1 rel-error 0.000621576
+  instance 2 rel-error 0.00117984
+  total runtime 25.039s in the mode sweep
 ```
+
+### Single-Instance Brute Margins
+
+Docker/Colima, one private instance per run, `Nx=Ny=320`, `Nt=65536`.
+
+| instance | private frequency | wall-clock | rel-error | status |
+| --- | --- | --- | --- | --- |
+| 0 | 96 | 101.589s | 6.36695e-05 | pass |
+| 1 | 192 | 99.996s | 6.71011e-05 | pass |
+| 2 | 128 | 101.105s | 7.54524e-05 | pass |
+
+Classification: leak-risk for any per-instance 180s budget. The final
+candidate therefore requires the documented shared verifier budget across all
+private instances.
+
+### Real Three-Instance Solver Table
+
+Docker/Colima, one shared 180s budget, `Nx=Ny=320`.
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 320x320 | adaptive | 25.039s | i0:0.00059492, i1:0.000621576, i2:0.00117984 | pass | 1.0 |
+| brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
+| coarse_dt | 3 | 320x320 | 128 | 0.658s | i0:1.14476, i1:0.530429, i2:11.015 | fail | 0.0 |
+| explicit | 3 | 320x320 | 4096 | 0.064s | i0:error, i1:error, i2:error | fail | 0.0 |

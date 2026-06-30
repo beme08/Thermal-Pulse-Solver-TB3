@@ -19,10 +19,25 @@ REPORT_PATH = Path(os.environ.get("THERMAL_REPORT_PATH", "/tmp/thermal_pulse_rep
 SHARED_BUDGET_SEC = float(os.environ.get("THERMAL_SHARED_BUDGET_SEC", "180"))
 REL_ERROR_THRESHOLD = 5.0e-3
 
-INSTANCES = [
+ALL_INSTANCES = [
     {"instance": 0, "freq": 96.0, "reference_nt": 4096},
     {"instance": 1, "freq": 192.0, "reference_nt": 8192},
+    {"instance": 2, "freq": 128.0, "reference_nt": 4096},
 ]
+
+
+def selected_instances() -> list[dict[str, float]]:
+    raw_ids = os.environ.get("THERMAL_INSTANCE_IDS")
+    if raw_ids:
+        ids = {int(part.strip()) for part in raw_ids.split(",") if part.strip()}
+        return [instance for instance in ALL_INSTANCES if int(instance["instance"]) in ids]
+    count = int(os.environ.get("THERMAL_INSTANCE_COUNT", "3"))
+    if count < 1 or count > len(ALL_INSTANCES):
+        raise ValueError(f"THERMAL_INSTANCE_COUNT must be 1..{len(ALL_INSTANCES)}")
+    return ALL_INSTANCES[:count]
+
+
+INSTANCES = selected_instances()
 
 
 def compile_agent(work: Path) -> Path:
@@ -126,6 +141,8 @@ def run_instance(binary: Path, instance: dict[str, float], work: Path, deadline:
         "THERMAL_INSTANCE": str(idx),
         "HOME": "/tmp",
     }
+    if os.environ.get("THERMAL_SOLVER_MODE"):
+        env["THERMAL_SOLVER_MODE"] = os.environ["THERMAL_SOLVER_MODE"]
     remaining = max(0.0, deadline - time.monotonic())
     if remaining <= 0.0:
         raise AssertionError("shared verifier budget exhausted before instance run")
@@ -186,6 +203,8 @@ def main() -> int:
         for instance in INSTANCES:
             result = run_instance(binary, instance, work, deadline)
             report["instances"].append(result)
+            if result.get("timed_out"):
+                raise AssertionError(f"instance {result['instance']} timed out")
         report["total_runtime_sec"] = time.monotonic() - started
     REPORT_PATH.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))

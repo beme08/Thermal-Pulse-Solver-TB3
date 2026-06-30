@@ -26,6 +26,8 @@ Params params() {
     const int instance = raw ? std::atoi(raw) : 0;
     if (instance == 1) {
         p.freq = 192.0;
+    } else if (instance == 2) {
+        p.freq = 128.0;
     }
     return p;
 }

@@ -14,8 +14,10 @@ evaluation, the task should move to spatial+temporal cost coupling instead.
 - `explicit` is unstable.
   - Measured: `Nx=Ny=320`, `Nt=4096`, unstable in about `0.008s`.
   - Classification: `unstable-fail`.
-- Reference-style ADI/CN path fits comfortably.
-  - Measured: `Nx=Ny=320`, `Nt=4096`, about `6.4s`.
+- Numerical reference-style ADI/CN path fits comfortably.
+  - Measured in Docker with three shared-budget instances:
+    `25.039s` total, rel-errors `0.000594920`, `0.000621576`,
+    and `0.00117984`.
 
 ## What Failed
 
@@ -46,15 +48,34 @@ the reference grid and blind high `Nt`, which passes under budget.
 
 ## Conditional Multi-Instance Result
 
-Two deterministic instances under one shared 180s budget separated cleanly:
+An earlier exact-formula reference artifact was rejected because it evaluated
+the manufactured temperature directly and matched verifier truth to machine
+precision. The current reference artifact is a numerical ADI/CN solve using
+only public oracle calls.
+
+Three deterministic instances under one shared 180s budget separated cleanly
+with the real numerical reference:
 
 ```text
-reference total: 19.378s
-brute Nt=65536 total: timeout at 180.000s
+reference total: 25.039s, reward 1.0
+brute Nt=65536 total: timeout at 180.000s, reward 0.0
+coarse Nt=128 total: 0.658s, reward 0.0
+explicit Nt=4096 total: 0.064s, reward 0.0
 ```
 
 This is a valid runtime discriminator under the local TB3 pattern: one verifier
 script/process evaluates multiple cases under `[verifier].timeout_sec`.
+
+The single-instance brute margin remains a documented leak risk:
+
+```text
+instance 0: Nt=65536 -> 101.589s, pass
+instance 1: Nt=65536 -> 99.996s, pass
+instance 2: Nt=65536 -> 101.105s, pass
+```
+
+Therefore this candidate is valid only for the documented shared-budget
+verifier model, not a per-instance timeout model.
 
 ## Next Decision
 

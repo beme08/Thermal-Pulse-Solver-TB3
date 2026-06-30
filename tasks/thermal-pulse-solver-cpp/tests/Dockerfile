@@ -5,6 +5,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tests
-COPY test.sh test_thermal.py thermal_oracle.hpp thermal_oracle_impl.cpp /tests/
+COPY test.sh test_thermal.py measure_solver_modes.py thermal_oracle.hpp thermal_oracle_impl.cpp /tests/
 
 CMD ["bash", "/tests/test.sh"]

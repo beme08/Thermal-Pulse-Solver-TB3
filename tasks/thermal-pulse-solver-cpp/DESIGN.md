@@ -112,8 +112,8 @@ separation is only a valid gate lever if the final verifier evaluates all
 private instances inside one shared task timeout. It is not a gate closer if the
 final harness gives every instance a fresh 180s budget.
 
-Measured Docker/Colima result with two deterministic instances under one shared
-180s budget:
+Preliminary Docker/Colima result with two deterministic instances under one
+shared 180s budget:
 
 ```text
 Reference multi-instance sequence:
@@ -133,9 +133,52 @@ uses one `test.sh` invocation, one unittest process, and loops over three
 private instances inside that verifier process under `[verifier].timeout_sec`.
 `hybrid-retrieval-fusion` similarly evaluates generated hidden banks inside a
 single verifier invocation. The thermal verifier now follows that pattern:
-one `tests/test.sh`, one verifier phase, two deterministic private instances,
-and one shared 180s wall-clock.
+one `tests/test.sh`, one verifier phase, multiple deterministic private
+instances, and one shared 180s wall-clock.
+
+The final candidate uses three deterministic private instances because the
+three-instance robustness check preserves reference margin while increasing
+blind over-resolution cost.
+
+Single-instance brute-overresolve margins at `Nx=Ny=320`, `Nt=65536`:
+
+| instance | private frequency | wall-clock | rel-error | status |
+| --- | --- | --- | --- | --- |
+| 0 | 96 | 101.589s | 6.36695e-05 | pass |
+| 1 | 192 | 99.996s | 6.71011e-05 | pass |
+| 2 | 128 | 101.105s | 7.54524e-05 | pass |
+
+This documents the budget-model dependency: a per-instance 180s budget would
+leak because each blind high-`Nt` solve passes individually.
 
 If a later external rubric review rejects shared-budget multi-instance
 evaluation, skip this as a gate lever and move to spatial+temporal cost
 coupling.
+
+## Numerical reference validation
+
+An interim reference artifact was rejected because it evaluated the
+manufactured temperature formula directly and matched verifier truth to
+machine precision. The current reference artifact is a numerical ADI/CN-style
+solver. It uses only public oracle calls:
+
+- `heat_source`
+- `initial_temp`
+- `boundary_value`
+- `conductivity_x`
+- `conductivity_y`
+- `rho_cp`
+- `domain_T`
+
+It does not call a verifier truth function or contain the hidden instance
+frequencies. The source term is reconstructed from public `heat_source` samples
+using the observed low-rank time structure, then advanced on a `320^2` grid.
+
+Docker/Colima final three-instance table under one shared 180s verifier budget:
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 320x320 | adaptive | 25.039s | i0:0.00059492, i1:0.000621576, i2:0.00117984 | pass | 1.0 |
+| brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
+| coarse_dt | 3 | 320x320 | 128 | 0.658s | i0:1.14476, i1:0.530429, i2:11.015 | fail | 0.0 |
+| explicit | 3 | 320x320 | 4096 | 0.064s | i0:error, i1:error, i2:error | fail | 0.0 |

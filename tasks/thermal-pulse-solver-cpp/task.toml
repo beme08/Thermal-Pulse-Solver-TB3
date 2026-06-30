@@ -1,0 +1,7 @@
+id = "thermal-pulse-solver-cpp"
+name = "Thermal Pulse Solver C++"
+environment_mode = "separate"
+
+[timeouts]
+run_seconds = 180
+compile_seconds = 60

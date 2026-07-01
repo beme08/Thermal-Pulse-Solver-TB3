@@ -350,3 +350,29 @@ The agent searched for bypass opportunities (searched `/app` 115 times, referenc
 The hardened task now rejects all known agent strategies: legitimate standard solvers (numerical failure), historical solves (replay failure), and adversarial cheat attempts (timeout). No verifier exploit, hidden-data access, or structural bypass was found across all 8 trial runs.
 
 **Grep findings:** `k_intervals = 128` and `exact_output_times` are benign solver variables — no hidden/test/verifier/reward/shell/proc/env exploit indicators were discovered. The solver attempted a legitimate ADI-style scheme with fixed grid parameters, which underresolved or timed out on the hardened private instances.
+
+## Final Standard Gatekeeper Trial
+
+### gatekeeper-codex-thermalpulse-final-1
+
+- Mode: standard
+- Agent/model: Codex / openai/gpt-5.5
+- Reward: 0.0, Exceptions: 0, Runtime: 15m57s, Cost: $1.960097
+- Classification: clean numerical failure
+- First failure: instance 0 relative error `0.0501037 > 0.005`
+
+```text
+total verifier runtime: completed all instances; instance 0 error 0.0501037
+```
+
+The agent implemented an adaptive solver with grid exploration but failed to resolve the spatial structure of the hardened private instance 0. Grep hits `128`, `fine_n = 96`, and grid candidate arrays are benign solver constants — no hidden/test/verifier/reward/shell/proc/env exploit indicators were discovered.
+
+**Updated hardening loop status:**
+
+1. Original Codex solver saved as `codex_pass_1` — replayed on hardened verifier = 0.0.
+2. Three fresh Codex standard runs on first hardened checksum = 0.0.
+3. Cheat solver saved as `cheat_codex_pass_1` — replayed on cheat-hardened verifier = 0.0.
+4. Fresh Codex cheat run on final hardened checksum = 0.0.
+5. Fresh Codex standard run on final hardened checksum = 0.0.
+
+All 9 trial runs (4 standard, 2 historical replay, 2 cheat, 1 standard final) show no verifier exploit, hidden-data access, or structural bypass. The benchmark is hardened against all known agent strategies.

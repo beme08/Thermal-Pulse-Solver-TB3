@@ -1,14 +1,14 @@
 # Trial Results
 
-No Harbor standard or cheat trials have been run yet. The multi-instance
-verifier smoke checks have run locally/Docker, but they are not Harbor agent
-trials.
+One Harbor standard Codex trial has run and passed legitimately. No Harbor
+cheat trials have been run yet. The multi-instance verifier smoke checks below
+are local/Docker checks, not Harbor agent trials.
 
 Each future trial must record these fields:
 
 | job name | agent | model | reasoning config | task checksum | git commit | standard vs cheat | reward | exceptions | runtime | classification | trajectory notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| pending | pending | pending | pending | pending | pending | standard | pending | pending | pending | pending | pending |
+| gatekeeper-codex-thermalpulse-1 | Codex | openai/gpt-5.5 | reasoning_effort=xhigh | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | standard | 1.0 | 0 | 12m08s | legitimate solve | Implemented adaptive oracle-sampling ADI/finite-volume solver. No hidden constants, verifier paths, tests, private truth, or brute-force strategy observed. |
 | pending | pending | pending | pending | pending | pending | cheat | pending | pending | pending | pending | pending |
 
 ## Local Verifier Smoke Checks
@@ -21,17 +21,35 @@ Each future trial must record these fields:
 | multi-instance-real-solver-table-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; brute/coarse/explicit 0.0 | none | brute timeout 180.000s | legitimate-pass | Real reference fits shared budget; brute high-`Nt` times out during instance 1; coarse silently wrong; explicit unstable. |
 | single-instance-brute-margins-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | n/a | none | 99.996s-101.589s | brute-force-pass | Each private instance passes individually with blind `Nt=65536`; confirms per-instance budgets would leak. |
 | three-instance-real-solver-table-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; brute/coarse/explicit 0.0 | none | reference 25.039s; brute timeout 180.000s | legitimate-pass | Final candidate uses three deterministic instances under one shared verifier budget; reference remains under 60s, brute times out, coarse and explicit fail. |
+| codex_pass_1-replay-local | Codex | openai/gpt-5.5 artifact | n/a | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | replay baseline | 1.0 | none | 8.876s | legitimate-pass | Saved Harbor artifact replayed from `tests/baselines/codex_pass_1`; errors `0.00112895`, `0.00108784`, `0.00100115`. Docker replay was skipped because Colima/Docker was not running. |
 
-## Classification Labels
+## Trial Classification Rules
 
-- `legitimate-pass`: solved by intended discovery plus stable efficient solve.
-- `legitimate-fail`: failed without verifier exploit.
-- `brute-force-pass`: passed by blind over-resolution under budget.
-- `timeout-fail`: exceeded wall-clock.
-- `silent-wrong-fail`: emitted plausible but inaccurate values.
-- `unstable-fail`: numerical blowup, NaN, inf, or invalid output.
-- `exploit-pass`: passed by leaking truth, hidden points, private params, or verifier state.
-- `harness-error`: task infrastructure failed or result is not interpretable.
+Classification rules follow the benchmark FAQ.
+
+A Harbor run is counted only if:
+- Trials = 1
+- Exceptions = 0
+
+Invalid runs (do not count):
+- DNS/package-manager setup failure
+- OAuth/token setup failure
+- API/provider rate limit
+- agent harness crash before task attempt
+
+For valid runs:
+- reward 0.0 = clean failure only after trajectory review
+- reward 1.0 = inspect trajectory before any task change
+
+First-failure taxonomy:
+- infra/provider
+- auth/setup
+- task misunderstanding
+- numerical method failure
+- budget/timeout
+- schema/output failure
+- verifier exploit
+- legitimate solve
 
 ## Required Notes Per Trial
 
@@ -46,4 +64,4 @@ For every trial, include:
 - Runtime and timeout boundary.
 - Exceptions, stderr, invalid output, or verifier errors.
 - Short trajectory notes: how the agent appeared to choose `Nt`, `Nx`, solver type, and whether it sampled the oracle.
-- Classification from the labels above.
+- Classification from the taxonomy above.

@@ -77,10 +77,57 @@ instance 2: Nt=65536 -> 101.105s, pass
 Therefore this candidate is valid only for the documented shared-budget
 verifier model, not a per-instance timeout model.
 
+## Codex Standard Pass Analysis
+
+`gatekeeper-codex-thermalpulse-1` is classified as a legitimate solve:
+
+```text
+reward: 1.0
+exceptions: 0
+total verifier runtime: 6.6335s
+instance errors: 0.00112895, 0.00108784, 0.00100115
+```
+
+The submitted solution did not contain hidden instance constants, verifier/test
+paths, manufactured truth code, or private data access. It used the public
+oracle to estimate spatial and temporal structure, then implemented a cheap
+adaptive ADI/finite-volume solver. This means the brute-overresolve gate worked,
+but the intended solution path is discoverable by Codex under the current
+threshold.
+
+The artifact is saved as:
+
+```text
+tests/baselines/codex_pass_1/solution.cpp
+```
+
+Current replay result against the local verifier:
+
+```text
+codex_pass_1 replay: reward 1.0
+total runtime: 8.876s
+instance errors: 0.00112895, 0.00108784, 0.00100115
+```
+
+Any hardening loop must include this replay baseline before changing verifier
+settings. The next target matrix is:
+
+```text
+reference = 1.0
+nop = 0.0
+coarse_dt = 0.0
+explicit = 0.0
+brute_overresolve = 0.0/timeout
+codex_pass_1 replay = 0.0
+```
+
 ## Next Decision
 
-Proceed with the shared-budget multi-instance design and document the budget
-model explicitly.
+The candidate is fair but no longer all-fail for Codex. The next hardening
+cycle should target the observed failure mode: Codex passed with a capped grid
+around `132` and errors near `0.001` under a `0.005` threshold. Prefer a
+measured spatial+temporal stress instance and replay `codex_pass_1` before any
+new Harbor trials.
 
 If a later review determines the budget must be per instance, move to
 spatial+temporal cost coupling:

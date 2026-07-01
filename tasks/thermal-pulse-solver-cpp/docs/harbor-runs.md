@@ -1,7 +1,9 @@
 # Harbor Runs
 
-One Harbor standard Codex run has been completed. No Harbor cheat runs have
-been launched yet.
+Four Harbor standard Codex runs have been completed: one legitimate pass and
+three clean numerical failures after hardening. Codex hardened standard
+trials: 3 valid runs, 0 exceptions, all reward 0.0. No Harbor cheat runs
+have been launched yet.
 
 Use this file for job-level Harbor metadata. Detailed result interpretation
 belongs in `../TRIAL_RESULTS.md`; gate and sweep evidence belongs in
@@ -30,10 +32,12 @@ command:
 
 ## Run Index
 
-| date | job name | agent | model | reasoning config | task checksum | git commit | mode | reward | exceptions | runtime | classification | trajectory notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-06-29 | gatekeeper-codex-thermalpulse-1 | Codex | openai/gpt-5.5 | xhigh | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | standard | 1.0 | 0 | 12m08s | legitimate solve | Adaptive oracle-sampling ADI/finite-volume solver passed all three private instances. Artifact saved as `../tests/baselines/codex_pass_1/solution.cpp`; Docker replay also returns reward 1.0 in 6.664s. |
-| 2026-07-01 | gatekeeper-codex-thermalpulse-hardened-1 | Codex | openai/gpt-5.5 | xhigh | 6666f89c620c4a50e5af6395cf9efe74bf4d1527a0a0c04c47b3746b2fb64eb2 | 86ec8d4 | standard | 0.0 | 0 | 12m50s | clean numerical failure | Adaptive solver with frequency/omega estimation and grid selection failed instance 1 at relative error `0.00564189 > 0.005`. No verifier/test leakage observed. |
+| date | job name | agent | model | reasoning config | task checksum | git commit | mode | reward | exceptions | runtime | cost | classification | trajectory notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-29 | gatekeeper-codex-thermalpulse-1 | Codex | openai/gpt-5.5 | xhigh | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | standard | 1.0 | 0 | 12m08s | - | legitimate solve | Adaptive oracle-sampling ADI/finite-volume solver passed all three private instances. Artifact saved as `../tests/baselines/codex_pass_1/solution.cpp`; Docker replay also returns reward 1.0 in 6.664s. |
+| 2026-07-01 | gatekeeper-codex-thermalpulse-hardened-1 | Codex | openai/gpt-5.5 | xhigh | 6666f89c620c4a50e5af6395cf9efe74bf4d1527a0a0c04c47b3746b2fb64eb2 | 86ec8d4 | standard | 0.0 | 0 | 12m50s | - | clean numerical failure | Adaptive solver with frequency/omega estimation and grid selection failed instance 1 at relative error `0.00564189 > 0.005`. No verifier/test leakage observed. |
+| 2026-07-01 | gatekeeper-codex-thermalpulse-hardened-2 | Codex | openai/gpt-5.5 | xhigh | 6666f89c620c4a50e5af6395cf9efe74bf4d1527a0a0c04c47b3746b2fb64eb2 | 137e548 | standard | 0.0 | 0 | 17m29s | - | clean numerical failure | Adaptive solver failed instance 2 at relative error `0.00574273 > 0.005`. Grep hits `N = 96` and `N = 128` are grid-size constants, not hidden-frequency leakage. |
+| 2026-07-01 | gatekeeper-codex-thermalpulse-hardened-3 | Codex | openai/gpt-5.5 | xhigh | 6666f89c620c4a50e5af6395cf9efe74bf4d1527a0a0c04c47b3746b2fb64eb2 | 137e548 | standard | 0.0 | 0 | 25m47s | $2.700929 | clean numerical failure | Adaptive solver failed instance 0 at relative error `0.0115036 > 0.005`. Grep hits `intervals = 96`, `even_clamp(..., 28, 96)`, `std::max({96, ...})` are grid constants. |
 
 ## Run Detail
 
@@ -51,6 +55,35 @@ command:
 
 Verifier failed on instance 1 with relative error `0.00564189`, above the threshold `0.005`. The submitted solution attempted an adaptive frequency/omega-estimating numerical method, but underresolved the hardened private case. No verifier/test leakage was observed.
 
+### gatekeeper-codex-thermalpulse-hardened-2
+
+- Date: 2026-07-01
+- Agent/model: Codex / openai/gpt-5.5
+- Mode: standard
+- Reasoning: xhigh
+- Task checksum: `6666f89c620c4a50e5af6395cf9efe74bf4d1527a0a0c04c47b3746b2fb64eb2`
+- Git commit: `137e548`
+- Result: reward `0.0`, exceptions `0`
+- Runtime: 17m29s
+- Classification: clean numerical failure
+
+Verifier failed on instance 2 with relative error `0.00574273 > 0.005`. Grep hits `N = 96` and `N = 128` appear to be grid-size constants, not hidden-frequency leakage.
+
+### gatekeeper-codex-thermalpulse-hardened-3
+
+- Date: 2026-07-01
+- Agent/model: Codex / openai/gpt-5.5
+- Mode: standard
+- Reasoning: xhigh
+- Task checksum: `6666f89c620c4a50e5af6395cf9efe74bf4d1527a0a0c04c47b3746b2fb64eb2`
+- Git commit: `137e548`
+- Result: reward `0.0`, exceptions `0`
+- Runtime: 25m47s
+- Cost: $2.700929
+- Classification: clean numerical failure
+
+Verifier failed on instance 0 with relative error `0.0115036 > 0.005`. Grep hits `intervals = 96`, `even_clamp(..., 28, 96)`, and `std::max({96, ...})` are generic interval/grid constants, not hidden-frequency leakage.
+
 ## Preconditions Before Next Harbor Run
 
 - Gate is closed through the shared-budget multi-instance design.
@@ -58,5 +91,20 @@ Verifier failed on instance 1 with relative error `0.00564189`, above the thresh
 - Trusted oracle restore is implemented.
 - Reference/oracle path gets full reward with margin.
 - `nop`, `coarse_dt`, `explicit`, and brute baselines produce expected failures.
+- `codex_pass_1` replay = 0.0 on hardened verifier.
 - Anti-cheat checks pass.
 - Task checksum and git commit are stamped in `TRIAL_RESULTS.md`.
+
+## Hardened Scorecard (current)
+
+| baseline | reward |
+|---|---|
+| reference | 1.0 |
+| nop/starter | 0.0 |
+| coarse_dt | 0.0 |
+| explicit | 0.0 |
+| brute_overresolve | 0.0 |
+| codex_pass_1 replay | 0.0 |
+| Codex hardened #1 | 0.0 |
+| Codex hardened #2 | 0.0 |
+| Codex hardened #3 | 0.0 |

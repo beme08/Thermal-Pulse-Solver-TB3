@@ -169,16 +169,13 @@ Do not:
 - Keep increasing `f*`.
 - Polish the final verifier before the gate closes.
 
-## Fresh Codex hardened run
+## Fresh Codex hardened runs
 
-`gatekeeper-codex-thermalpulse-hardened-1` was the first fresh Codex run after
-hardening against `codex_pass_1`.
+### gatekeeper-codex-thermalpulse-hardened-1
 
-Result:
+The first fresh Codex run after hardening against `codex_pass_1`.
 
-- Trials: 1
-- Exceptions: 0
-- Reward: 0.0
+- Trials: 1, Exceptions: 0, Reward: 0.0, Runtime: 12m50s
 - First failure: instance 1 relative error `0.00564189 > 0.005`
 
 The trajectory indicates a legitimate attempt at the intended approach: the agent
@@ -186,9 +183,31 @@ implemented an adaptive solver with frequency/omega estimation and grid
 selection. The run failed numerically on the hardened private instance, not
 through infrastructure failure or verifier exploit.
 
-This confirms the hardening loop worked:
+### gatekeeper-codex-thermalpulse-hardened-2
+
+- Trials: 1, Exceptions: 0, Reward: 0.0, Runtime: 17m29s
+- First failure: instance 2 relative error `0.00574273 > 0.005`
+
+Clean numerical failure. Grep hits `N = 96` and `N = 128` are grid-size
+constants, not hidden-frequency leakage.
+
+### gatekeeper-codex-thermalpulse-hardened-3
+
+- Trials: 1, Exceptions: 0, Reward: 0.0, Runtime: 25m47s, Cost: $2.700929
+- First failure: instance 0 relative error `0.0115036 > 0.005`
+
+Clean numerical failure. Grep hits `intervals = 96`, `even_clamp(..., 28, 96)`,
+and `std::max({96, ...})` are generic interval/grid constants, not
+hidden-frequency leakage.
+
+### Summary
+
+Three consecutive Codex hardened runs all fail cleanly with zero exceptions on
+the same task checksum. The hardening loop is confirmed:
 
 1. Prior Codex solution was saved as `codex_pass_1`.
 2. `codex_pass_1` replay passed the old verifier.
 3. The hardened verifier/private instance made `codex_pass_1` fail.
-4. A fresh Codex run also failed cleanly.
+4. Three fresh Codex runs also failed cleanly.
+5. No re-hardening is needed: the current matrix closes `codex_pass_1` replay
+   and fresh agents fail on the intended numerical difficulty.

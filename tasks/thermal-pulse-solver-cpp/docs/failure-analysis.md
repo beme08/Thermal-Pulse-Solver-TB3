@@ -101,11 +101,15 @@ The artifact is saved as:
 tests/baselines/codex_pass_1/solution.cpp
 ```
 
-Current replay result against the local verifier:
+Current replay results:
 
 ```text
-codex_pass_1 replay: reward 1.0
+codex_pass_1 local replay: reward 1.0
 total runtime: 8.876s
+instance errors: 0.00112895, 0.00108784, 0.00100115
+
+codex_pass_1 Docker replay: reward 1.0
+total runtime: 6.664s
 instance errors: 0.00112895, 0.00108784, 0.00100115
 ```
 

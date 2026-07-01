@@ -32,7 +32,7 @@ command:
 
 | job name | agent | model | reasoning config | task checksum | git commit | standard vs cheat | reward | exceptions | runtime | classification | trajectory notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| gatekeeper-codex-thermalpulse-1 | Codex | openai/gpt-5.5 | reasoning_effort=xhigh | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | standard | 1.0 | 0 | 12m08s | legitimate solve | Adaptive oracle-sampling ADI/finite-volume solver passed all three private instances. Artifact saved as `../tests/baselines/codex_pass_1/solution.cpp`. |
+| gatekeeper-codex-thermalpulse-1 | Codex | openai/gpt-5.5 | reasoning_effort=xhigh | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | standard | 1.0 | 0 | 12m08s | legitimate solve | Adaptive oracle-sampling ADI/finite-volume solver passed all three private instances. Artifact saved as `../tests/baselines/codex_pass_1/solution.cpp`; Docker replay also returns reward 1.0 in 6.664s. |
 
 ## Preconditions Before Next Harbor Run
 

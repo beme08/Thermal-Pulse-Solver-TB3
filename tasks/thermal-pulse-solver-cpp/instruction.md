@@ -7,7 +7,7 @@ deterministic, and may contain time structure not visible from a few samples.
 Sample the oracle as needed and choose a stable discretization that resolves the
 relevant temporal and spatial scales.
 
-The verifier may evaluate multiple deterministic private cases in one run under
+The grader may evaluate multiple deterministic private cases in one run under
 one shared wall-clock budget. Efficient per-case resolution selection matters:
 blindly over-resolving every case can exceed the budget even when a stable
 implicit solve with the right time scale fits.

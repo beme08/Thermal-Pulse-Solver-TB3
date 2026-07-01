@@ -8,20 +8,20 @@ author_email = "beme08@users.noreply.github.com"
 category = "scientific-computing"
 tags = ["heat-equation", "adi", "finite-difference", "oracle", "pde"]
 expert_time_estimate_hours = 4
-relevant_experience = "Experience with numerical PDE solvers, finite-difference/finite-volume discretizations, verifier-owned oracle tasks, and benchmark hardening."
+relevant_experience = "Experience with numerical PDE solvers, finite-difference/finite-volume discretizations, private-oracle tasks, and benchmark hardening."
 difficulty_explanation = """
 The task requires solving a transient two-dimensional heat equation from a
 black-box oracle. Public examples are intentionally insufficient to determine
-the time scale. The verifier evaluates three deterministic private
-instances inside one verifier run, so efficient per-instance temporal
+the time scale. The grader evaluates three deterministic private
+instances inside one grading run, so efficient per-instance temporal
 resolution selection and a stable 2D implicit method matter under the shared
 wall-clock budget.
 """
 verification_explanation = """
-Separate-verifier mode. The verifier compiles the submitted /app/solution.cpp
+Separate-grading mode. The grader compiles the submitted /app/solution.cpp
 against a trusted oracle restored in a private build directory, then evaluates
-three deterministic hidden thermal instances under one shared verifier timeout.
-Private verifier data lives only in the verifier container. The agent-visible
+three deterministic private thermal instances under one shared grading timeout.
+Private scoring data lives only in the grading container. The agent-visible
 /app contains only the public oracle declarations and starter solution skeleton.
 """
 
@@ -40,7 +40,7 @@ storage_mb = 10240
 gpus = 0
 
 # Internet is allowed so Harbor can install the agent harness during setup.
-# Benchmark isolation comes from separate-verifier mode and private
-# verifier-only scoring data, not from breaking package-manager setup.
+# Benchmark isolation comes from separate-grading mode and private scoring data,
+# not from breaking package-manager setup.
 allow_internet = true
 network_mode = "public"

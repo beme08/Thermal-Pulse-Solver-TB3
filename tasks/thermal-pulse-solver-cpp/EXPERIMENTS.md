@@ -40,6 +40,8 @@ find tasks/thermal-pulse-solver-cpp -type f \
 | three-instance-real-solver-table-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; brute/coarse/explicit 0.0 | none | reference 25.039s; brute timeout 180.000s | pass | Three deterministic private instances preserve reference margin and make the shared-budget brute timeout robust enough for the final candidate. |
 | codex_pass_1-replay-docker | Codex | openai/gpt-5.5 artifact | n/a | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | replay baseline | 1.0 | none | 6.664s | legitimate-pass | Saved Codex standard artifact still passes the current verifier in Docker; this is now the formal negative baseline for hardening. |
 | codex-pass-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; nop/coarse/explicit/brute/codex_pass_1 0.0 | none | reference 25.069s; codex replay 6.692s | pass | One private smooth spatial packet was sharpened; reference still passes, brute still times out, and `codex_pass_1` now fails on instance 2 with rel-error `0.00635706`. |
+| cheat-codex-pass-replay-before-hardening | Codex | openai/gpt-5.5 artifact | n/a | 5a4130d9a23a21ddcaa262940ae7140a3dea95680bc63856f74a8d076df7ab62 | dd9ae88 | replay baseline | 1.0 | none | 37.447s | legitimate-pass | Saved cheat-trial artifact is byte-identical to Harbor artifact and reproduces the pass against the current hardened verifier. Errors `0.00132861`, `0.00125662`, `0.00236865`. |
+| cheat-codex-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; nop/coarse/explicit/brute/codex_pass_1/cheat_codex_pass_1 0.0 | none | reference 36.608s; cheat replay 35.568s | pass | Same smooth private packet sharpened further and reference grid raised to `384^2`; cheat replay now fails on instance 2 with rel-error `0.00610366`. |
 
 ## Key Tables
 
@@ -166,3 +168,19 @@ Docker/Colima, one shared 180s budget. The verifier threshold remains `0.005`.
 | explicit | 3 | 320x320 | 4096 | 0.067s | i0:error, i1:error, i2:error | fail | 0.0 |
 | brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
 | codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | 6.692s | i0:0.00112895, i1:0.00108784, i2:0.00635706 | fail | 0.0 |
+
+### Cheat Codex Pass Spatial Hardening Candidate
+
+Docker/Colima, one shared 180s budget. The verifier threshold remains `0.005`.
+Before hardening, the saved `cheat_codex_pass_1` replay passed with errors
+`0.00132861`, `0.00125662`, `0.00236865` and total runtime `37.447s`.
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 384x384 | adaptive | 36.608s | i0:0.000586615, i1:0.000612769, i2:0.00334672 | pass | 1.0 |
+| nop/starter | 3 | n/a | n/a | <1s | i0:1.0 | fail | 0.0 |
+| coarse_dt | 3 | 384x384 | 128 | 0.956s | i0:1.14477, i1:0.530429, i2:3.48587 | fail | 0.0 |
+| explicit | 3 | 384x384 | 4096 | 0.094s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0112699 | fail | 0.0 |
+| cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | 35.568s | i0:0.00132861, i1:0.00125662, i2:0.00610366 | fail | 0.0 |

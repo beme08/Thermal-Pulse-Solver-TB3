@@ -19,6 +19,8 @@ MODES = [
     ("explicit", "explicit", "4096"),
 ]
 
+GRID_LABEL = os.environ.get("THERMAL_GRID_LABEL", "solver-selected")
+
 
 def mode_filter() -> list[tuple[str, str, str]]:
     raw = os.environ.get("THERMAL_MODE_FILTER")
@@ -119,7 +121,7 @@ def main() -> int:
                 {
                     "solver": label,
                     "instances": len(test_thermal.INSTANCES),
-                    "grid": "320x320",
+                    "grid": GRID_LABEL,
                     "nt": nt_label,
                     "total_wall_clock": total,
                     "per_instance": instances,

@@ -267,6 +267,55 @@ The task tree `tasks/thermal-pulse-solver-cpp` was identical across all runs.
 
 The cheat trial did not discover a bypass. The benchmark's difficulty is
 purely numerical: an agent with adequate resolution and adaptive time-stepping
-can solve it legitimately. No additional hardening gates are needed for this
-cheat path. The three-instance shared-budget verifier remains effective at
-rejecting coarse/explicit/brute-overresolve strategies.
+can solve it legitimately. Treat this as a frontier numerical solution, not a
+cheat exploit.
+
+## Cheat Pass Replay Hardening
+
+The cheat artifact is saved as:
+
+```text
+tests/baselines/cheat_codex_pass_1/solution.cpp
+```
+
+The saved file is byte-identical to the Harbor artifact:
+
+```text
+3028edcfe7049878f534bc696c67b8dc52b18e4d6b96f3cb0503f78279d2a1fc
+```
+
+Before hardening, Docker replay reproduced the pass:
+
+| replay | reward | total runtime | errors |
+| --- | --- | --- | --- |
+| cheat_codex_pass_1 | 1.0 | 37.447s | `0.00132861`, `0.00125662`, `0.00236865` |
+
+Inspection summary:
+
+- Public oracle only: `heat_source`, `initial_temp`, `boundary_value`,
+  `conductivity_x`, `conductivity_y`, `rho_cp`.
+- No `/tests`, verifier, hidden fixture, reward, `/proc`, shell, `system`,
+  `popen`, `fork`, or `exec` usage.
+- Numerical method: ADI / Crank-Nicolson style finite-volume solve.
+- Spatial resolution: adaptive interval count up to `192`.
+- Temporal resolution: adaptive time step chosen from 257 sampled time points.
+- Numeric constants such as `192` are grid/time caps, not hidden parameters.
+
+The hardening candidate keeps the threshold fixed at `0.005`, further sharpens
+one smooth private deterministic spatial packet, and raises the trusted
+reference artifact grid to `384^2`.
+
+Docker/Colima matrix:
+
+| solver | reward | runtime | notes |
+| --- | --- | --- | --- |
+| reference | 1.0 | 36.608s | errors `0.000586615`, `0.000612769`, `0.00334672` |
+| nop/starter | 0.0 | <1s | instance 0 relative error `1.0` |
+| coarse_dt | 0.0 | 0.956s | errors `1.14477`, `0.530429`, `3.48587` |
+| explicit | 0.0 | 0.094s | unstable/error on all instances |
+| brute_overresolve | 0.0 | 180.000s | instance 0 passes, instance 1 times out |
+| codex_pass_1 replay | 0.0 | <10s | instance 2 relative error `0.0112699` exceeds `0.005` |
+| cheat_codex_pass_1 replay | 0.0 | 35.568s | instance 2 relative error `0.00610366` exceeds `0.005` |
+
+This hardens against the observed cheat-passing numerical solver without adding
+cheat-mode detection or changing the public output contract.

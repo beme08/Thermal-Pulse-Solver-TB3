@@ -33,10 +33,10 @@ struct Factors {
 };
 
 struct Grid {
-    int nx = 320;
-    int ny = 320;
-    int nx_int = 318;
-    int ny_int = 318;
+    int nx = 384;
+    int ny = 384;
+    int nx_int = 382;
+    int ny_int = 382;
     int nt = 4096;
     double hx = 1.0 / 319.0;
     double hy = 1.0 / 319.0;

@@ -22,7 +22,7 @@ REL_ERROR_THRESHOLD = 5.0e-3
 ALL_INSTANCES = [
     {"instance": 0, "freq": 96.0, "reference_nt": 4096, "sharp": 36.0},
     {"instance": 1, "freq": 192.0, "reference_nt": 8192, "sharp": 36.0},
-    {"instance": 2, "freq": 128.0, "reference_nt": 4096, "sharp": 256.0},
+    {"instance": 2, "freq": 128.0, "reference_nt": 4096, "sharp": 640.0},
 ]
 
 

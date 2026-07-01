@@ -183,7 +183,7 @@ Docker/Colima final three-instance table under one shared 180s verifier budget:
 | coarse_dt | 3 | 320x320 | 128 | 0.658s | i0:1.14476, i1:0.530429, i2:11.015 | fail | 0.0 |
 | explicit | 3 | 320x320 | 4096 | 0.064s | i0:error, i1:error, i2:error | fail | 0.0 |
 
-## Codex pass hardening candidate
+## Codex replay hardening candidates
 
 `codex_pass_1` was a legitimate adaptive oracle-sampling ADI/finite-volume
 solve that capped its grid near `132^2` and passed the previous verifier with
@@ -201,3 +201,22 @@ Docker/Colima hardening matrix:
 | explicit | 3 | 320x320 | 4096 | 0.067s | i0:error, i1:error, i2:error | fail | 0.0 |
 | brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
 | codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | 6.692s | i0:0.00112895, i1:0.00108784, i2:0.00635706 | fail | 0.0 |
+
+The cheat-trial artifact was also a legitimate adaptive ADI/finite-volume solve,
+not a verifier exploit. It sampled only the public oracle, used a grid selected
+up to `192`, and passed the `codex_pass_1` hardening with errors
+`0.00132861`, `0.00125662`, `0.00236865`. The second hardening candidate keeps
+the same threshold, further sharpens the same private smooth spatial packet,
+and raises the trusted reference grid to `384^2` to preserve reference margin.
+
+Docker/Colima cheat-replay hardening matrix:
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 384x384 | adaptive | 36.608s | i0:0.000586615, i1:0.000612769, i2:0.00334672 | pass | 1.0 |
+| nop/starter | 3 | n/a | n/a | <1s | i0:1.0 | fail | 0.0 |
+| coarse_dt | 3 | 384x384 | 128 | 0.956s | i0:1.14477, i1:0.530429, i2:3.48587 | fail | 0.0 |
+| explicit | 3 | 384x384 | 4096 | 0.094s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0112699 | fail | 0.0 |
+| cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | 35.568s | i0:0.00132861, i1:0.00125662, i2:0.00610366 | fail | 0.0 |

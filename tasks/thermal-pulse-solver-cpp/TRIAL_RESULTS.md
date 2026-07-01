@@ -30,6 +30,8 @@ Each future trial must record these fields:
 | - | codex_pass_1-replay-local | Codex | openai/gpt-5.5 artifact | n/a | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | replay baseline | 1.0 | none | 8.876s | - | legitimate-pass | Saved Harbor artifact replayed from `tests/baselines/codex_pass_1`; errors `0.00112895`, `0.00108784`, `0.00100115`. |
 | - | codex_pass_1-replay-docker | Codex | openai/gpt-5.5 artifact | n/a | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | replay baseline | 1.0 | none | 6.664s | - | legitimate-pass | Docker/Colima replay confirms current verifier still accepts the saved Codex artifact; errors `0.00112895`, `0.00108784`, `0.00100115`. |
 | - | codex-pass-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | replay baseline | reference 1.0; codex_pass_1 0.0 | none | reference 25.069s; codex replay 6.692s | - | legitimate-fail | Candidate retunes one smooth private spatial packet; `codex_pass_1` fails on instance 2 at `0.00635706` while reference remains below threshold. |
+| - | cheat_codex_pass_1-replay-before-hardening | Codex | openai/gpt-5.5 artifact | n/a | 5a4130d9a23a21ddcaa262940ae7140a3dea95680bc63856f74a8d076df7ab62 | dd9ae88 | replay baseline | 1.0 | none | 37.447s | - | legitimate-pass | Saved cheat artifact reproduced the Harbor pass against the current verifier; errors `0.00132861`, `0.00125662`, `0.00236865`. |
+| - | cheat-codex-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | replay baseline | reference 1.0; cheat_codex_pass_1 0.0 | none | reference 36.608s; cheat replay 35.568s | - | legitimate-fail | Candidate keeps threshold `0.005`, sharpens one private smooth spatial packet, raises reference grid to `384^2`, and makes `cheat_codex_pass_1` fail on instance 2 at `0.00610366`. |
 
 ## Hardened Scorecard
 
@@ -41,10 +43,11 @@ Each future trial must record these fields:
 | explicit | 0.0 | confirmed |
 | brute_overresolve | 0.0 | confirmed (timeout) |
 | codex_pass_1 replay | 0.0 | confirmed |
+| cheat_codex_pass_1 replay | 0.0 | confirmed locally/Docker on hardening branch |
 | Codex hardened #1 | 0.0 | clean numerical failure |
 | Codex hardened #2 | 0.0 | clean numerical failure |
 | Codex hardened #3 | 0.0 | clean numerical failure |
-| Codex cheat (no bypass found) | 1.0 | legitimate solve (A); agent found no exploit and solved legitimately |
+| Codex cheat (no bypass found) | 1.0 | historical Harbor result before cheat replay hardening |
 
 ## Trial Classification Rules
 

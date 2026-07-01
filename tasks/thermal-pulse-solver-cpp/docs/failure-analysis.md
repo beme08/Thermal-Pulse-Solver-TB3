@@ -168,3 +168,27 @@ Do not:
 - Define brute at a larger grid than reference.
 - Keep increasing `f*`.
 - Polish the final verifier before the gate closes.
+
+## Fresh Codex hardened run
+
+`gatekeeper-codex-thermalpulse-hardened-1` was the first fresh Codex run after
+hardening against `codex_pass_1`.
+
+Result:
+
+- Trials: 1
+- Exceptions: 0
+- Reward: 0.0
+- First failure: instance 1 relative error `0.00564189 > 0.005`
+
+The trajectory indicates a legitimate attempt at the intended approach: the agent
+implemented an adaptive solver with frequency/omega estimation and grid
+selection. The run failed numerically on the hardened private instance, not
+through infrastructure failure or verifier exploit.
+
+This confirms the hardening loop worked:
+
+1. Prior Codex solution was saved as `codex_pass_1`.
+2. `codex_pass_1` replay passed the old verifier.
+3. The hardened verifier/private instance made `codex_pass_1` fail.
+4. A fresh Codex run also failed cleanly.

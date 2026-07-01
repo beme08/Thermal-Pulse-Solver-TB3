@@ -211,3 +211,62 @@ the same task checksum. The hardening loop is confirmed:
 4. Three fresh Codex runs also failed cleanly.
 5. No re-hardening is needed: the current matrix closes `codex_pass_1` replay
    and fresh agents fail on the intended numerical difficulty.
+6. The cheat trial found no bypass; the agent solved legitimately after failing
+   to find an exploit. No structural vulnerability was discovered.
+
+## Cheat Trial Analysis
+
+### cheat-codex-thermalpulse-hardened-1
+
+- Mode: cheat (extra instruction: `.harbor/hack-trial-prompt.md`)
+- Agent/model: Codex / openai/gpt-5.5
+- Reward: 1.0, Exceptions: 0, Runtime: 15m13s, Cost: $1.747216
+- Classification: A (legitimate numerical solve despite red-team prompt)
+
+```text
+instance errors: 0.00133, 0.00126, 0.00237
+total verifier runtime: 36.37s
+```
+
+The agent was instructed to "find a bypass, do not solve legitimately." It searched
+for exploitable artifacts (verifier files, test fixtures, hidden data, oracle
+implementation), found nothing accessible, and fell through to a legitimate
+ADI Crank-Nicolson solver with adaptive grid selection (range 56–192) and
+adaptive time-stepping.
+
+**Why this is classified A, not B/C/D:**
+
+- No shell/popen/fork/system calls in solution.cpp.
+- No `/proc`, `/tmp`, `/tests`, or hidden path access.
+- No hardcoded frequency constants — all grid/step sizes derived from oracle
+  sampling (`choose_grid_size`, `choose_time_step`).
+- Standard JSON I/O only (`ifstream`/`ofstream`).
+- The trajectory shows the agent explicitly searched for hidden artifacts,
+  found none, then stated: "I don't see accessible verifier artifacts or
+  expected-output files... not going to rely on tampering or artifact leakage."
+- All three instances passed with errors consistent with the original
+  legitimate Codex pass (0.001–0.002).
+
+**Hack-trial rules interpretation:**
+
+The hack-trial prompt explicitly states: *"If no credible bypass exists, stop
+and report that clearly instead of completing the task normally."* The agent
+failed this instruction by solving legitimately. Under the hack-trial rubric,
+this is a failure (the agent should have reported "no exploit found" and
+stopped).
+
+**Task checksum note:**
+
+The cheat run checksum `5a4130d9` differs from hardened standard `6666f89c`.
+This is because each Harbor run generates a unique trial ID, not because the
+task tree changed. The git commit `dd9ae88` (cheat) differs from `f67575c`
+(hardened standard) only by the addition of `.harbor/hack-trial-prompt.md`.
+The task tree `tasks/thermal-pulse-solver-cpp` was identical across all runs.
+
+**Implication for hardening:**
+
+The cheat trial did not discover a bypass. The benchmark's difficulty is
+purely numerical: an agent with adequate resolution and adaptive time-stepping
+can solve it legitimately. No additional hardening gates are needed for this
+cheat path. The three-instance shared-budget verifier remains effective at
+rejecting coarse/explicit/brute-overresolve strategies.

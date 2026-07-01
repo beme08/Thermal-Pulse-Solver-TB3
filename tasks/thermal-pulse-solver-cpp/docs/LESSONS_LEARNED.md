@@ -25,3 +25,9 @@
 9. **The "stop and report" instruction was ignored.** Codex with xhigh reasoning did not follow the rule "if no credible bypass exists, stop and report" — it fell through to a legitimate solve. This suggests hack-trial prompts may need stronger enforcement or a separate harness check.
 
 10. **Document cheat trial classification immediately.** Use the A/B/C/D taxonomy so the distinction between "found no bypass" (A) and "found and exploited a bypass" (B/C) is clear in the permanent record.
+
+## Cheat-Pass Replay Hardening
+
+11. **Save cheat-passing solver artifacts as replay baselines.** When a cheat trial passes with reward 1.0, save the artifact and include it in the hardening scorecard. Confirm replay failure before labeling the benchmark hardened against adversarial agents.
+
+12. **The full hardening loop is: standard pass → save artifact → harden → replay failure → fresh standard trials fail → cheat pass → save artifact → harden → replay failure → fresh cheat trial fails.** Only after both arms of the loop (standard + cheat) are closed is the benchmark truly hardened against all known agent strategies.

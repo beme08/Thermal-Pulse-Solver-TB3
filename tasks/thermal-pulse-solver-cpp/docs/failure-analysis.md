@@ -367,6 +367,20 @@ total verifier runtime: completed all instances; instance 0 error 0.0501037
 
 The agent implemented an adaptive solver with grid exploration but failed to resolve the spatial structure of the hardened private instance 0. Grep hits `128`, `fine_n = 96`, and grid candidate arrays are benign solver constants — no hidden/test/verifier/reward/shell/proc/env exploit indicators were discovered.
 
+### gatekeeper-codex-thermalpulse-final-2
+
+- Mode: standard
+- Agent/model: Codex / openai/gpt-5.5
+- Reward: 0.0, Exceptions: 0, Runtime: 16m17s, Cost: $2.178620
+- Classification: clean numerical failure
+- First failure: instance 2 relative error `0.00912555 > 0.005`
+
+```text
+total verifier runtime: completed all instances; instance 2 error 0.00912555
+```
+
+The agent attempted a solver with grid exploration across `grids = {24, 40, 64, 96, 128}` and used `spatial_tol = (grid < 96)` as a tolerance switch, but failed to resolve the frequency-128 structure of the hardened private instance 2. Grep hits are benign solver grid/tolerance constants — no hidden/test/verifier/reward/shell/proc/env exploit indicators were discovered.
+
 **Updated hardening loop status:**
 
 1. Original Codex solver saved as `codex_pass_1` — replayed on hardened verifier = 0.0.
@@ -374,5 +388,6 @@ The agent implemented an adaptive solver with grid exploration but failed to res
 3. Cheat solver saved as `cheat_codex_pass_1` — replayed on cheat-hardened verifier = 0.0.
 4. Fresh Codex cheat run on final hardened checksum = 0.0.
 5. Fresh Codex standard run on final hardened checksum = 0.0.
+6. Second fresh Codex standard run on final hardened checksum = 0.0.
 
-All 9 trial runs (4 standard, 2 historical replay, 2 cheat, 1 standard final) show no verifier exploit, hidden-data access, or structural bypass. The benchmark is hardened against all known agent strategies.
+All 10 trial runs (4 standard, 2 historical replay, 2 cheat, 2 standard final) show no verifier exploit, hidden-data access, or structural bypass. The benchmark is hardened against all known agent strategies.

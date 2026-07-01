@@ -31,10 +31,11 @@ def mode_filter() -> list[tuple[str, str, str]]:
 def run_instance_lenient(binary: Path, instance: dict[str, float], work: Path, deadline: float, mode: str) -> dict[str, object]:
     idx = int(instance["instance"])
     freq = float(instance["freq"])
+    sharp = float(instance.get("sharp", 36.0))
     run_dir = work / f"{mode}_instance_{idx}"
     run_dir.mkdir()
     queries = test_thermal.make_queries(idx)
-    truth = [test_thermal.exact_temp(freq, p["x"], p["y"], p["t"]) for p in queries]
+    truth = [test_thermal.exact_temp(freq, p["x"], p["y"], p["t"], sharp) for p in queries]
     inp = run_dir / "queries.json"
     out = run_dir / "predictions.json"
     inp.write_text(json.dumps({"points": queries}, separators=(",", ":")) + "\n", encoding="utf-8")

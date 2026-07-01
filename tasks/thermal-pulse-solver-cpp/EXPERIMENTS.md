@@ -39,6 +39,7 @@ find tasks/thermal-pulse-solver-cpp -type f \
 | single-instance-brute-margins-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | n/a | none | 99.996s-101.589s | leak-risk | Each private instance passes individually with blind `Nt=65536`, so the design relies on one shared verifier budget rather than per-instance timeouts. |
 | three-instance-real-solver-table-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; brute/coarse/explicit 0.0 | none | reference 25.039s; brute timeout 180.000s | pass | Three deterministic private instances preserve reference margin and make the shared-budget brute timeout robust enough for the final candidate. |
 | codex_pass_1-replay-docker | Codex | openai/gpt-5.5 artifact | n/a | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | replay baseline | 1.0 | none | 6.664s | legitimate-pass | Saved Codex standard artifact still passes the current verifier in Docker; this is now the formal negative baseline for hardening. |
+| codex-pass-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; nop/coarse/explicit/brute/codex_pass_1 0.0 | none | reference 25.069s; codex replay 6.692s | pass | One private smooth spatial packet was sharpened; reference still passes, brute still times out, and `codex_pass_1` now fails on instance 2 with rel-error `0.00635706`. |
 
 ## Key Tables
 
@@ -152,3 +153,16 @@ Docker/Colima, one shared 180s budget, `Nx=Ny=320`.
 | brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
 | coarse_dt | 3 | 320x320 | 128 | 0.658s | i0:1.14476, i1:0.530429, i2:11.015 | fail | 0.0 |
 | explicit | 3 | 320x320 | 4096 | 0.064s | i0:error, i1:error, i2:error | fail | 0.0 |
+
+### Codex Pass Spatial Hardening Candidate
+
+Docker/Colima, one shared 180s budget. The verifier threshold remains `0.005`.
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 320x320 | adaptive | 25.069s | i0:0.00059492, i1:0.000621576, i2:0.00185831 | pass | 1.0 |
+| nop/starter | 3 | n/a | n/a | <1s | i0:1.0 | fail | 0.0 |
+| coarse_dt | 3 | 320x320 | 128 | 0.653s | i0:1.14476, i1:0.530429, i2:5.56799 | fail | 0.0 |
+| explicit | 3 | 320x320 | 4096 | 0.067s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | 6.692s | i0:0.00112895, i1:0.00108784, i2:0.00635706 | fail | 0.0 |

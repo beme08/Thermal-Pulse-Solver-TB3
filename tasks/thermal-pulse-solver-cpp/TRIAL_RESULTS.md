@@ -23,6 +23,7 @@ Each future trial must record these fields:
 | three-instance-real-solver-table-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; brute/coarse/explicit 0.0 | none | reference 25.039s; brute timeout 180.000s | legitimate-pass | Final candidate uses three deterministic instances under one shared verifier budget; reference remains under 60s, brute times out, coarse and explicit fail. |
 | codex_pass_1-replay-local | Codex | openai/gpt-5.5 artifact | n/a | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | replay baseline | 1.0 | none | 8.876s | legitimate-pass | Saved Harbor artifact replayed from `tests/baselines/codex_pass_1`; errors `0.00112895`, `0.00108784`, `0.00100115`. |
 | codex_pass_1-replay-docker | Codex | openai/gpt-5.5 artifact | n/a | 02cae49195483ec8c40d9596bb39b9d0a0fd39c4ff152968014114a9370e5e6f | d531257 | replay baseline | 1.0 | none | 6.664s | legitimate-pass | Docker/Colima replay confirms current verifier still accepts the saved Codex artifact; errors `0.00112895`, `0.00108784`, `0.00100115`. |
+| codex-pass-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | replay baseline | reference 1.0; codex_pass_1 0.0 | none | reference 25.069s; codex replay 6.692s | legitimate-fail | Candidate retunes one smooth private spatial packet; `codex_pass_1` fails on instance 2 at `0.00635706` while reference remains below threshold. |
 
 ## Trial Classification Rules
 

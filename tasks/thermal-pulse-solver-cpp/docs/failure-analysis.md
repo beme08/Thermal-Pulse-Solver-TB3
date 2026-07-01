@@ -125,13 +125,32 @@ brute_overresolve = 0.0/timeout
 codex_pass_1 replay = 0.0
 ```
 
+## Spatial Hardening Candidate
+
+The current candidate targets the observed Codex failure mode without tightening
+the threshold or changing the output contract. One private deterministic
+instance is retuned within the same smooth manufactured family so the
+`codex_pass_1` capped grid underresolves the spatial packet.
+
+Docker/Colima matrix:
+
+| solver | reward | runtime | notes |
+| --- | --- | --- | --- |
+| reference | 1.0 | 25.069s | errors `0.00059492`, `0.000621576`, `0.00185831` |
+| nop/starter | 0.0 | <1s | instance 0 relative error `1.0` |
+| coarse_dt | 0.0 | 0.653s | errors `1.14476`, `0.530429`, `5.56799` |
+| explicit | 0.0 | 0.067s | unstable/error on all instances |
+| brute_overresolve | 0.0 | 180.000s | instance 0 passes, instance 1 times out |
+| codex_pass_1 replay | 0.0 | 6.692s | instance 2 relative error `0.00635706` exceeds `0.005` |
+
+This closes the replay baseline for the observed Codex artifact while
+preserving the original brute/coarse/explicit failure modes.
+
 ## Next Decision
 
-The candidate is fair but no longer all-fail for Codex. The next hardening
-cycle should target the observed failure mode: Codex passed with a capped grid
-around `132` and errors near `0.001` under a `0.005` threshold. Prefer a
-measured spatial+temporal stress instance and replay `codex_pass_1` before any
-new Harbor trials.
+The hardening candidate now satisfies the local replay matrix. Do not run Harbor
+until this candidate is reviewed as fair and the committed task checksum is
+recorded.
 
 If a later review determines the budget must be per instance, move to
 spatial+temporal cost coupling:

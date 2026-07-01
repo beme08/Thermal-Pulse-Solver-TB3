@@ -182,3 +182,22 @@ Docker/Colima final three-instance table under one shared 180s verifier budget:
 | brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
 | coarse_dt | 3 | 320x320 | 128 | 0.658s | i0:1.14476, i1:0.530429, i2:11.015 | fail | 0.0 |
 | explicit | 3 | 320x320 | 4096 | 0.064s | i0:error, i1:error, i2:error | fail | 0.0 |
+
+## Codex pass hardening candidate
+
+`codex_pass_1` was a legitimate adaptive oracle-sampling ADI/finite-volume
+solve that capped its grid near `132^2` and passed the previous verifier with
+errors around `0.001`. The hardening candidate retunes one private deterministic
+instance within the same smooth manufactured family so that this coarse spatial
+grid underresolves the packet. The threshold remains `0.005`.
+
+Docker/Colima hardening matrix:
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 320x320 | adaptive | 25.069s | i0:0.00059492, i1:0.000621576, i2:0.00185831 | pass | 1.0 |
+| nop/starter | 3 | n/a | n/a | <1s | i0:1.0 | fail | 0.0 |
+| coarse_dt | 3 | 320x320 | 128 | 0.653s | i0:1.14476, i1:0.530429, i2:5.56799 | fail | 0.0 |
+| explicit | 3 | 320x320 | 4096 | 0.067s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 320x320 | 65536 | 180.000s | i0:6.36695e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | 6.692s | i0:0.00112895, i1:0.00108784, i2:0.00635706 | fail | 0.0 |

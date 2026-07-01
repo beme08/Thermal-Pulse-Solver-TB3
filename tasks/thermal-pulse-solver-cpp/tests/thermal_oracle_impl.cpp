@@ -28,6 +28,7 @@ Params params() {
         p.freq = 192.0;
     } else if (instance == 2) {
         p.freq = 128.0;
+        p.sharp = 256.0;
     }
     return p;
 }

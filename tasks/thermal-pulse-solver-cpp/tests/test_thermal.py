@@ -20,9 +20,9 @@ SHARED_BUDGET_SEC = float(os.environ.get("THERMAL_SHARED_BUDGET_SEC", "180"))
 REL_ERROR_THRESHOLD = 5.0e-3
 
 ALL_INSTANCES = [
-    {"instance": 0, "freq": 96.0, "reference_nt": 4096},
-    {"instance": 1, "freq": 192.0, "reference_nt": 8192},
-    {"instance": 2, "freq": 128.0, "reference_nt": 4096},
+    {"instance": 0, "freq": 96.0, "reference_nt": 4096, "sharp": 36.0},
+    {"instance": 1, "freq": 192.0, "reference_nt": 8192, "sharp": 36.0},
+    {"instance": 2, "freq": 128.0, "reference_nt": 4096, "sharp": 256.0},
 ]
 
 
@@ -70,8 +70,7 @@ def temporal(freq: float, t: float) -> float:
     return (1.0 + 0.05 * t) * (1.0 + 0.75 * math.sin(2.0 * math.pi * freq * t))
 
 
-def spatial(x: float, y: float) -> float:
-    sharp = 36.0
+def spatial(x: float, y: float, sharp: float = 36.0) -> float:
     cx = 0.43
     cy = 0.58
     shape_b = 0.25
@@ -83,8 +82,8 @@ def spatial(x: float, y: float) -> float:
     )
 
 
-def exact_temp(freq: float, x: float, y: float, t: float) -> float:
-    return spatial(x, y) * temporal(freq, t)
+def exact_temp(freq: float, x: float, y: float, t: float, sharp: float = 36.0) -> float:
+    return spatial(x, y, sharp) * temporal(freq, t)
 
 
 def make_queries(instance: int, count: int = 768) -> list[dict[str, float]]:
@@ -132,7 +131,8 @@ def run_instance(binary: Path, instance: dict[str, float], work: Path, deadline:
     run_dir = work / f"instance_{idx}"
     run_dir.mkdir()
     queries = make_queries(idx)
-    truth = [exact_temp(freq, p["x"], p["y"], p["t"]) for p in queries]
+    sharp = float(instance.get("sharp", 36.0))
+    truth = [exact_temp(freq, p["x"], p["y"], p["t"], sharp) for p in queries]
     inp = run_dir / "queries.json"
     out = run_dir / "predictions.json"
     inp.write_text(json.dumps({"points": queries}, separators=(",", ":")) + "\n", encoding="utf-8")

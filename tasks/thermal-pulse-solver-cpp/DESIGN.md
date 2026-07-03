@@ -220,3 +220,29 @@ Docker/Colima cheat-replay hardening matrix:
 | brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
 | codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0112699 | fail | 0.0 |
 | cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | 35.568s | i0:0.00132861, i1:0.00125662, i2:0.00610366 | fail | 0.0 |
+
+## Claude replay hardening candidate
+
+`claude_pass_1` is a legitimate boundary-layer-aware adaptive ADI solve. It
+passes the `sharp=640` verifier with errors `0.000556352`, `0.00229326`,
+`0.00451386` and total runtime `32.851s`; no exploit or hidden-data dependency
+is involved. Strict all-fail compliance therefore requires one bounded replay
+hardening attempt, not a Claude-specific trap.
+
+The selected retune keeps the same threshold, query schema, instance count,
+frequencies, budget, and trusted reference grid. It only narrows the existing
+smooth private spatial packet for instance 2 from `sharp=640` to `sharp=760`.
+This tests whether adaptive spatial refinement generalizes beyond the previous
+packet width while preserving the same manufactured-solution family.
+
+Local verifier matrix on the retuned candidate:
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 384x384 | adaptive | 35.030s | i0:0.000586615, i1:0.000612769, i2:0.00390874 | pass | 1.0 |
+| coarse_dt | 3 | 384x384 | 128 | 0.950s | i0:1.14477, i1:0.530429, i2:3.11454 | fail | 0.0 |
+| explicit | 3 | 384x384 | 4096 | 0.111s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0126047 | fail | 0.0 |
+| cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | <60s | i2:0.00721098 | fail | 0.0 |
+| claude_pass_1 replay | 3 | adaptive <=256 | adaptive | <60s | i2:0.00529913 | fail | 0.0 |

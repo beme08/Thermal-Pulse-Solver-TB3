@@ -42,6 +42,8 @@ find tasks/thermal-pulse-solver-cpp -type f \
 | codex-pass-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; nop/coarse/explicit/brute/codex_pass_1 0.0 | none | reference 25.069s; codex replay 6.692s | pass | One private smooth spatial packet was sharpened; reference still passes, brute still times out, and `codex_pass_1` now fails on instance 2 with rel-error `0.00635706`. |
 | cheat-codex-pass-replay-before-hardening | Codex | openai/gpt-5.5 artifact | n/a | 5a4130d9a23a21ddcaa262940ae7140a3dea95680bc63856f74a8d076df7ab62 | dd9ae88 | replay baseline | 1.0 | none | 37.447s | legitimate-pass | Saved cheat-trial artifact is byte-identical to Harbor artifact and reproduces the pass against the current hardened verifier. Errors `0.00132861`, `0.00125662`, `0.00236865`. |
 | cheat-codex-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; nop/coarse/explicit/brute/codex_pass_1/cheat_codex_pass_1 0.0 | none | reference 36.608s; cheat replay 35.568s | pass | Same smooth private packet sharpened further and reference grid raised to `384^2`; cheat replay now fails on instance 2 with rel-error `0.00610366`. |
+| claude-pass-replay-before-hardening-local | Claude | claude_pass_1 artifact | n/a | not stamped | pending commit | replay baseline | 1.0 | none | 32.851s | legitimate-pass | Boundary-layer-aware adaptive solver passed the `sharp=640` verifier with errors `0.000556352`, `0.00229326`, `0.00451386`. |
+| claude-replay-spatial-hardening-local | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; coarse/explicit/brute/codex_pass_1/cheat_codex_pass_1/claude_pass_1 0.0 | none | reference 35.030s; brute timeout 180.000s; Claude fail <60s | pass | One bounded retune narrows the existing smooth private packet from `sharp=640` to `sharp=760`; threshold and schema unchanged. Claude replay now fails instance 2 at `0.00529913`. |
 
 ## Key Tables
 
@@ -184,3 +186,23 @@ Before hardening, the saved `cheat_codex_pass_1` replay passed with errors
 | brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
 | codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0112699 | fail | 0.0 |
 | cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | 35.568s | i0:0.00132861, i1:0.00125662, i2:0.00610366 | fail | 0.0 |
+
+### Claude Replay Spatial Hardening Candidate
+
+Local run, one shared 180s budget. The verifier threshold remains `0.005`.
+Before hardening, the saved `claude_pass_1` replay passed with errors
+`0.000556352`, `0.00229326`, `0.00451386` and total runtime `32.851s`.
+
+The hardening keeps the same three deterministic instances and only changes the
+existing private smooth spatial packet on instance 2 from `sharp=640` to
+`sharp=760`.
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 384x384 | adaptive | 35.030s | i0:0.000586615, i1:0.000612769, i2:0.00390874 | pass | 1.0 |
+| coarse_dt | 3 | 384x384 | 128 | 0.950s | i0:1.14477, i1:0.530429, i2:3.11454 | fail | 0.0 |
+| explicit | 3 | 384x384 | 4096 | 0.111s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0126047 | fail | 0.0 |
+| cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | <60s | i2:0.00721098 | fail | 0.0 |
+| claude_pass_1 replay | 3 | adaptive <=256 | adaptive | <60s | i2:0.00529913 | fail | 0.0 |

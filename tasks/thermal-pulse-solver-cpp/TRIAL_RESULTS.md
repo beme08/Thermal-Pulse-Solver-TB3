@@ -37,6 +37,8 @@ Each future trial must record these fields:
 | - | codex-pass-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | replay baseline | reference 1.0; codex_pass_1 0.0 | none | reference 25.069s; codex replay 6.692s | - | legitimate-fail | Candidate retunes one smooth private spatial packet; `codex_pass_1` fails on instance 2 at `0.00635706` while reference remains below threshold. |
 | - | cheat_codex_pass_1-replay-before-hardening | Codex | openai/gpt-5.5 artifact | n/a | 5a4130d9a23a21ddcaa262940ae7140a3dea95680bc63856f74a8d076df7ab62 | dd9ae88 | replay baseline | 1.0 | none | 37.447s | - | legitimate-pass | Saved cheat artifact reproduced the Harbor pass against the current verifier; errors `0.00132861`, `0.00125662`, `0.00236865`. |
 | - | cheat-codex-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | replay baseline | reference 1.0; cheat_codex_pass_1 0.0 | none | reference 36.608s; cheat replay 35.568s | - | legitimate-fail | Candidate keeps threshold `0.005`, sharpens one private smooth spatial packet, raises reference grid to `384^2`, and makes `cheat_codex_pass_1` fail on instance 2 at `0.00610366`. |
+| - | claude_pass_1-replay-before-hardening-local | Claude | claude_pass_1 artifact | n/a | not stamped | pending commit | replay baseline | 1.0 | none | 32.851s | - | legitimate-pass | Saved Claude artifact passed the `sharp=640` verifier with errors `0.000556352`, `0.00229326`, `0.00451386`; no exploit or hidden-data dependency observed. |
+| - | claude-replay-spatial-hardening-local | Codex | GPT-5 Codex | default | not stamped | pending commit | replay baseline | reference 1.0; codex_pass_1/cheat_codex_pass_1/claude_pass_1 0.0 | none | reference 35.030s; brute timeout 180.000s | - | legitimate-fail | Candidate keeps threshold/schema fixed and changes instance 2 from `sharp=640` to `sharp=760`; Claude replay fails instance 2 at `0.00529913`, cheat replay at `0.00721098`, Codex replay at `0.0126047`. |
 
 ## Hardened Scorecard
 
@@ -49,6 +51,7 @@ Each future trial must record these fields:
 | brute_overresolve | 0.0 | confirmed (timeout) |
 | codex_pass_1 replay | 0.0 | confirmed |
 | cheat_codex_pass_1 replay | 0.0 | confirmed locally/Docker on hardening branch |
+| claude_pass_1 replay | 0.0 | confirmed locally after bounded replay hardening |
 | Codex hardened #1 | 0.0 | clean numerical failure |
 | Codex hardened #2 | 0.0 | clean numerical failure |
 | Codex hardened #3 | 0.0 | clean numerical failure |

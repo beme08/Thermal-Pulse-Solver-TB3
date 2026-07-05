@@ -146,7 +146,8 @@ int detect_nt() {
             prev = cur;
         }
     }
-    return crossings > 300 ? 8192 : 4096;
+    const int detected = crossings > 300 ? 8192 : 4096;
+    return detected * 2;
 }
 
 Grid make_grid() {

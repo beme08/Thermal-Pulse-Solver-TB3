@@ -44,6 +44,8 @@ find tasks/thermal-pulse-solver-cpp -type f \
 | cheat-codex-spatial-hardening-docker | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; nop/coarse/explicit/brute/codex_pass_1/cheat_codex_pass_1 0.0 | none | reference 36.608s; cheat replay 35.568s | pass | Same smooth private packet sharpened further and reference grid raised to `384^2`; cheat replay now fails on instance 2 with rel-error `0.00610366`. |
 | claude-pass-replay-before-hardening-local | Claude | claude_pass_1 artifact | n/a | not stamped | pending commit | replay baseline | 1.0 | none | 32.851s | legitimate-pass | Boundary-layer-aware adaptive solver passed the `sharp=640` verifier with errors `0.000556352`, `0.00229326`, `0.00451386`. |
 | claude-replay-spatial-hardening-local | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; coarse/explicit/brute/codex_pass_1/cheat_codex_pass_1/claude_pass_1 0.0 | none | reference 35.030s; brute timeout 180.000s; Claude fail <60s | pass | One bounded retune narrows the existing smooth private packet from `sharp=640` to `sharp=760`; threshold and schema unchanged. Claude replay now fails instance 2 at `0.00529913`. |
+| reference-margin-diagnostic-local | Codex | GPT-5 Codex | default | not stamped | pending commit | reference diagnostic | n/a | none | instance 2 only | pass | With `sharp=760`, instance 2 error is temporal dominated: `384^2` detected Nt gives `0.00390874`, `384^2` with 2x Nt gives `0.00113210`, and `512^2` detected Nt gives `0.00382996`. |
+| reference-margin-strengthening-local | Codex | GPT-5 Codex | default | not stamped | pending commit | sweep | reference 1.0; coarse/explicit/brute/codex_pass_1/cheat_codex_pass_1/claude_pass_1 0.0 | none | reference 68.707s in mode matrix; Docker verifier 72.981s/73.456s | pass | Trusted reference keeps `384^2` and doubles detected reference Nt. Instance 2 error improves to `0.00113210`; replay baselines still fail at the same errors. |
 
 ## Key Tables
 
@@ -204,5 +206,41 @@ existing private smooth spatial packet on instance 2 from `sharp=640` to
 | explicit | 3 | 384x384 | 4096 | 0.111s | i0:error, i1:error, i2:error | fail | 0.0 |
 | brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
 | codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0126047 | fail | 0.0 |
+| cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | <60s | i2:0.00721098 | fail | 0.0 |
+| claude_pass_1 replay | 3 | adaptive <=256 | adaptive | <60s | i2:0.00529913 | fail | 0.0 |
+
+### Reference Margin Strengthening
+
+Local/Docker verifier checks, one shared 180s budget. The verifier challenge is
+unchanged from the Claude replay hardening candidate. Only the trusted
+reference artifact is strengthened.
+
+Instance-2 diagnostic:
+
+| reference variant | rel-error | runtime |
+| --- | --- | --- |
+| 384x384, detected Nt | 0.00390874 | 9.464s |
+| 384x384, 2x detected Nt | 0.00113210 | 18.589s |
+| 512x512, detected Nt | 0.00382996 | 19.877s |
+
+The error is temporal dominated, so the final reference candidate keeps the
+`384^2` grid and doubles detected reference-mode `Nt`.
+
+Two Docker verifier runs:
+
+| run | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- |
+| 1 | 72.981s | i0:0.000153511, i1:0.000178274, i2:0.00113210 | pass | 1.0 |
+| 2 | 73.456s | i0:0.000153511, i1:0.000178274, i2:0.00113210 | pass | 1.0 |
+
+Mode matrix and replay checks:
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 384x384 | adaptive x2 | 68.707s | i0:0.000153511, i1:0.000178274, i2:0.00113210 | pass | 1.0 |
+| coarse_dt | 3 | 384x384 | 128 | 0.910s | i0:1.14477, i1:0.530429, i2:3.11454 | fail | 0.0 |
+| explicit | 3 | 384x384 | 4096 | 0.110s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <15s | i2:0.0126047 | fail | 0.0 |
 | cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | <60s | i2:0.00721098 | fail | 0.0 |
 | claude_pass_1 replay | 3 | adaptive <=256 | adaptive | <60s | i2:0.00529913 | fail | 0.0 |

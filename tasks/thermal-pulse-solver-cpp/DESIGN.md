@@ -246,3 +246,40 @@ Local verifier matrix on the retuned candidate:
 | codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <10s | i2:0.0126047 | fail | 0.0 |
 | cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | <60s | i2:0.00721098 | fail | 0.0 |
 | claude_pass_1 replay | 3 | adaptive <=256 | adaptive | <60s | i2:0.00529913 | fail | 0.0 |
+
+## Reference margin strengthening
+
+The `sharp=760` replay hardening closes `claude_pass_1`, but the initial
+reference margin was thin: instance 2 error `0.00390874` against threshold
+`0.005`. A reference-only diagnostic showed this error was temporal dominated,
+not spatial dominated:
+
+| reference variant | instance | rel-error | runtime | interpretation |
+| --- | --- | --- | --- | --- |
+| 384x384, detected Nt | 2 | 0.00390874 | 9.464s | baseline |
+| 384x384, 2x detected Nt | 2 | 0.00113210 | 18.589s | large improvement |
+| 512x512, detected Nt | 2 | 0.00382996 | 19.877s | negligible improvement |
+
+The trusted reference therefore keeps the `384^2` grid and doubles the detected
+reference-mode `Nt`. The verifier challenge is unchanged: same private
+instances, `sharp=760`, threshold, schema, and shared budget.
+
+Two Docker verifier runs of the strengthened reference are deterministic in
+error and remain below the 90s target runtime:
+
+| run | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- |
+| 1 | 72.981s | i0:0.000153511, i1:0.000178274, i2:0.00113210 | pass | 1.0 |
+| 2 | 73.456s | i0:0.000153511, i1:0.000178274, i2:0.00113210 | pass | 1.0 |
+
+Mode and replay gates remain valid:
+
+| solver | instances | grid | Nt | total wall-clock | per-instance error | status | reward |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| reference | 3 | 384x384 | adaptive x2 | 68.707s | i0:0.000153511, i1:0.000178274, i2:0.00113210 | pass | 1.0 |
+| coarse_dt | 3 | 384x384 | 128 | 0.910s | i0:1.14477, i1:0.530429, i2:3.11454 | fail | 0.0 |
+| explicit | 3 | 384x384 | 4096 | 0.110s | i0:error, i1:error, i2:error | fail | 0.0 |
+| brute_overresolve | 3 | 384x384 | 65536 | 180.000s | i0:4.70678e-05, i1:timeout | fail | 0.0 |
+| codex_pass_1 replay | 3 | adaptive <=132-ish | adaptive | <15s | i2:0.0126047 | fail | 0.0 |
+| cheat_codex_pass_1 replay | 3 | adaptive <=192 | adaptive | <60s | i2:0.00721098 | fail | 0.0 |
+| claude_pass_1 replay | 3 | adaptive <=256 | adaptive | <60s | i2:0.00529913 | fail | 0.0 |
